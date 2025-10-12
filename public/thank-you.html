@@ -51,11 +51,43 @@
             color: #666;
         }
         
-        .phone-link {
+        .contact-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 4px solid #FFA500;
+        }
+        
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .contact-item i {
             color: #FFA500;
-            font-weight: 600;
-            text-decoration: none;
             font-size: 1.2rem;
+            width: 20px;
+        }
+        
+        .contact-link {
+            color: #1E3A8A;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .contact-link:hover {
+            color: #FFA500;
         }
         
         .btn {
@@ -79,12 +111,13 @@
             box-shadow: 0 5px 15px rgba(255,165,0,0.3);
         }
         
-        .contact-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 25px 0;
-            border-left: 4px solid #FFA500;
+        .whatsapp-btn {
+            background: #25D366;
+            margin-left: 10px;
+        }
+        
+        .whatsapp-btn:hover {
+            background: #128C7E;
         }
         
         @media (max-width: 480px) {
@@ -94,6 +127,20 @@
             
             h1 {
                 font-size: 1.8rem;
+            }
+            
+            .contact-details {
+                gap: 12px;
+            }
+            
+            .btn-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                margin-left: 0;
             }
         }
     </style>
@@ -106,19 +153,45 @@
         
         <h1>Thank You! 🌞</h1>
         
-        <p>Your message has been received successfully. We appreciate you contacting Solar Assist.</p>
+        <p><strong>Your message has been received successfully!</strong></p>
+        <p>We appreciate you contacting Solar Assist for your solar maintenance needs.</p>
         
         <div class="contact-info">
             <p><strong>We will contact you within 24 hours.</strong></p>
-            <p>For immediate assistance, call us directly:</p>
-            <a href="tel:+918281770660" class="phone-link">+91 82817 70660</a>
+            <p>For immediate assistance, feel free to reach out directly:</p>
+            
+            <div class="contact-details">
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:+918281770660" class="contact-link">+91 82817 70660</a>
+                </div>
+                
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:solarassist25@gmail.com" class="contact-link">solarassist25@gmail.com</a>
+                </div>
+                
+                <div class="contact-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <a href="https://wa.me/918281770660?text=Hi, I'm interested in solar maintenance services" class="contact-link">Message on WhatsApp</a>
+                </div>
+            </div>
         </div>
         
-        <p>While you wait, you can explore our services or learn more about solar maintenance.</p>
+        <p>While you wait, you can explore our services or learn more about solar maintenance benefits.</p>
         
-        <a href="https://solarassist.in" class="btn">
-            <i class="fas fa-arrow-left"></i> Back to Homepage
-        </a>
+        <div class="btn-container">
+            <a href="https://solarassist.in" class="btn">
+                <i class="fas fa-arrow-left"></i> Back to Homepage
+            </a>
+            <a href="https://wa.me/918281770660?text=Hi, I just submitted the contact form and wanted to connect directly" class="btn whatsapp-btn">
+                <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+            </a>
+        </div>
+        
+        <p style="margin-top: 20px; font-size: 0.9rem; color: #999;">
+            Your trust means everything to us. We're committed to providing the best solar service experience.
+        </p>
     </div>
 
     <!-- Font Awesome for icons -->
