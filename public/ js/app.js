@@ -14,62 +14,56 @@ navLinks.forEach(link => {
     });
 });
 
-// Simple Email Form Submission
+// FormSubmit.co Form Submission
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const submitButton = contactForm.querySelector('button[type="submit"]');
         const originalText = submitButton.textContent;
         
-        // Show loading state
-        submitButton.textContent = 'Sending...';
-        submitButton.disabled = true;
-        
-        // Get form data
-        const formData = {
-            name: document.getElementById('name').value,
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value || 'Not provided',
-            message: document.getElementById('message').value
-        };
-        
-        // Create email body
-        const emailBody = `
-Name: ${formData.name}
-Phone: ${formData.phone}
-Email: ${formData.email}
-Message: ${formData.message}
-
-Submitted from SolarAssist website on ${new Date().toLocaleString('en-IN')}
-        `;
-        
-        // Use mailto
-        const mailtoLink = `mailto:contact@solarassist.in?subject=New SolarAssist Lead: ${encodeURIComponent(formData.name)}&body=${encodeURIComponent(emailBody)}`;
-        
-        // Show success message
-        showNotification('Thank you! Opening email to send your message...', 'success');
-        
-        // Open email client after short delay
-        setTimeout(() => {
-            window.location.href = mailtoLink;
-        }, 1000);
-        
-        // Reset form after a delay
-        setTimeout(() => {
-            contactForm.reset();
+        try {
+            // Show loading state
+            submitButton.textContent = 'Sending...';
+            submitButton.disabled = true;
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            
+            // Submit to FormSubmit.co
+            const response = await fetch(contactForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                // Success
+                showNotification('Thank you for your message! We will contact you soon.', 'success');
+                contactForm.reset();
+                
+                // Track in Google Analytics
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'form_submit', {
+                        'event_category': 'lead',
+                        'event_label': 'Contact Form'
+                    });
+                }
+            } else {
+                throw new Error('Form submission failed');
+            }
+            
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            showNotification('Sorry, there was an error. Please call us directly at +91 82817 70660.', 'error');
+        } finally {
+            // Reset button state
             submitButton.textContent = originalText;
             submitButton.disabled = false;
-            
-            // Track in Google Analytics
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'form_submit', {
-                    'event_category': 'lead',
-                    'event_label': 'Contact Form'
-                });
-            }
-        }, 3000);
+        }
     });
 }
 
