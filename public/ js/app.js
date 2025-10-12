@@ -14,28 +14,82 @@ navLinks.forEach(link => {
     });
 });
 
-// Form Submission
+// Form Submission with Formspree
 const contactForm = document.getElementById('contactForm');
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitButton = contactForm.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        
+        try {
+            // Show loading state
+            submitButton.textContent = 'Sending...';
+            submitButton.disabled = true;
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            
+            // Submit to Formspree
+            const response = await fetch(contactForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                // Success
+                showNotification('Thank you for your message! We will contact you soon.', 'success');
+                contactForm.reset();
+                
+                // Track in Google Analytics
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'form_submit', {
+                        'event_category': 'lead',
+                        'event_label': 'Contact Form',
+                        'value': 1
+                    });
+                }
+            } else {
+                throw new Error('Form submission failed');
+            }
+            
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            showNotification('Sorry, there was an error submitting your form. Please call us directly at +91 98765 43210.', 'error');
+        } finally {
+            // Reset button state
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        }
+    });
+}
+
+// Notification function
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
     
-    // Get form data
-    const formData = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        message: document.getElementById('message').value,
-        timestamp: new Date().toISOString()
-    };
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">&times;</button>
+    `;
     
-    // Here you would typically send this data to a server
-    // For Firebase, you could use Firestore or Realtime Database
-    console.log('Form submitted:', formData);
+    document.body.appendChild(notification);
     
-    // Show success message
-    alert('Thank you for your message! We will contact you soon.');
-    contactForm.reset();
-});
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
 
 // Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -59,8 +113,23 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 document.querySelectorAll('.btn').forEach(button => {
     button.addEventListener('click', function(e) {
         if(this.getAttribute('href') && this.getAttribute('href').startsWith('tel:')) {
-            // Track phone calls (you can integrate with analytics)
-            console.log('Phone call initiated:', this.getAttribute('href'));
+            // Track phone calls
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'phone_click', {
+                    'event_category': 'engagement',
+                    'event_label': this.getAttribute('href')
+                });
+            }
+        }
+        
+        if(this.getAttribute('href') && this.getAttribute('href').includes('wa.me')) {
+            // Track WhatsApp clicks
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'whatsapp_click', {
+                    'event_category': 'engagement',
+                    'event_label': 'WhatsApp Contact'
+                });
+            }
         }
     });
 });
