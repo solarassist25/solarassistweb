@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 
                 <div class="contact-form">
-          <form id="contactForm" action="mailto:contact@solarassist.in" method="post" enctype="text/plain">
+    <form id="contactForm" action="https://formsubmit.co/contact@solarassist.in" method="POST">
         <div class="form-group">
             <label for="name">Your Name *</label>
             <input type="text" id="name" name="name" class="form-control" required>
@@ -245,8 +245,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <textarea id="message" name="message" class="form-control" required></textarea>
         </div>
         
-        <!-- Hidden fields for email subject -->
-        <input type="hidden" name="subject" value="SolarAssist Contact Form Submission">
+        <!-- FormSubmit Hidden Fields -->
+        <input type="hidden" name="_subject" value="🌞 New SolarAssist Lead!">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" value="https://solarassist.in/thank-you.html">
+        <input type="text" name="_honey" style="display:none">
         
         <button type="submit" class="btn btn-secondary">Send Message</button>
     </form>
