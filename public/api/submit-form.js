@@ -9,7 +9,7 @@ export default async function handler(req, res) {
         const { name, phone, email, message } = req.body;
 
         // Your Google Apps Script Web App URL (replace with your actual URL)
-        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwE7XVJvpPiU6LaRYsUZtsdLzpWCSXoeCp1QI3pkhNz21XlvEEMawL69QlT_ApgLAt3rg/exec';
 
         // Send data to Google Sheets
         const response = await fetch(GOOGLE_SCRIPT_URL, {
