@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 
                 <div class="contact-form">
-                    <form id="contactForm" action="https://formsubmit.co/solarassist25@gmail.com" method="POST">
+                    <form id="contactForm">
                         <div class="form-group">
                             <label for="name">Your Name *</label>
                             <input type="text" id="name" name="name" class="form-control" required>
@@ -242,17 +242,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         
                         <div class="form-group">
                             <label for="message">Your Message *</label>
-                            <textarea id="message" name="message" class="form-control" required></textarea>
+                            <textarea id="message" name="message" class="form-control" placeholder="How can we help you? (e.g., Solar system maintenance, Consultation, Repair services, etc.)" required></textarea>
                         </div>
                         
-                        <!-- FormSubmit Hidden Fields -->
-                        <input type="hidden" name="_subject" value="🌞 New SolarAssist Lead!">
-                        <input type="hidden" name="_template" value="table">
-                        <input type="hidden" name="_captcha" value="false">
-                        <input type="hidden" name="_next" value="https://solarassist.in/thank-you.html">
-                        <input type="text" name="_honey" style="display:none">
+                        <button type="submit" class="btn btn-secondary" id="submitBtn">
+                            <span id="btnText">Send Message</span>
+                            <div id="btnSpinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i> Sending...
+                            </div>
+                        </button>
                         
-                        <button type="submit" class="btn btn-secondary">Send Message</button>
+                        <!-- Status Message -->
+                        <div id="formStatus" style="display: none; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center;"></div>
                     </form>
                 </div>
             </div>
@@ -310,5 +311,72 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- JavaScript -->
     <script src="js/app.js"></script>
+
+    <!-- Google Sheets Form Submission Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const formStatus = document.getElementById('formStatus');
+
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'block';
+            submitBtn.disabled = true;
+            formStatus.style.display = 'none';
+
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                // Send to Vercel API
+                const response = await fetch('/api/submit-form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Success message
+                    showStatus(result.message, 'success');
+                    contactForm.reset();
+                } else {
+                    // Error message
+                    showStatus(result.error || 'Something went wrong! Please try again.', 'error');
+                }
+            } catch (error) {
+                // Network error
+                showStatus('Network error. Please check your connection and try again.', 'error');
+            } finally {
+                // Reset button state
+                btnText.style.display = 'block';
+                btnSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showStatus(message, type) {
+            formStatus.textContent = message;
+            formStatus.style.display = 'block';
+            formStatus.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+            formStatus.style.color = type === 'success' ? '#155724' : '#721c24';
+            formStatus.style.border = `1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'}`;
+        }
+    });
+    </script>
 </body>
 </html>
