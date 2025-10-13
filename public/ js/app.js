@@ -1,156 +1,82 @@
-// Mobile Menu Toggle
-const mobileMenu = document.querySelector('.mobile-menu');
-const nav = document.querySelector('nav');
-
-mobileMenu.addEventListener('click', () => {
-    nav.classList.toggle('active');
-});
-
-// Close mobile menu when clicking on a link
-const navLinks = document.querySelectorAll('nav ul li a');
-navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        nav.classList.remove('active');
-    });
-});
-
-// FormSubmit.co Form Submission
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitButton = contactForm.querySelector('button[type="submit"]');
-        const originalText = submitButton.textContent;
-        
-        try {
-            // Show loading state
-            submitButton.textContent = 'Sending...';
-            submitButton.disabled = true;
-            
-            // Get form data
-            const formData = new FormData(contactForm);
-            
-            // Submit to FormSubmit.co
-            const response = await fetch(contactForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                // Success
-                showNotification('Thank you for your message! We will contact you soon.', 'success');
-                contactForm.reset();
-                
-                // Track in Google Analytics
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'form_submit', {
-                        'event_category': 'lead',
-                        'event_label': 'Contact Form'
-                    });
-                }
-            } else {
-                throw new Error('Form submission failed');
-            }
-            
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            showNotification('Sorry, there was an error. Please call us directly at +91 82817 70660.', 'error');
-        } finally {
-            // Reset button state
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-        }
-    });
-}
-
-// Notification function
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => notification.remove());
+// Google Apps Script Code - paste in Code.gs
+function doPost(e) {
+  try {
+    // Get the data from the web form
+    const data = JSON.parse(e.postData.contents);
     
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()">&times;</button>
-    `;
+    // Open your Google Sheet (replace with your actual Sheet ID)
+    const sheet = SpreadsheetApp.openById('YOUR_SHEET_ID_HERE').getActiveSheet();
     
-    document.body.appendChild(notification);
+    // Create a new row with form data - matching your columns
+    const timestamp = new Date();
+    const row = [
+      timestamp,                    // A: Timestamp
+      data.name || '',             // B: Name
+      data.phone || '',            // C: Phone
+      data.email || '',            // D: Email
+      data.message || '',          // E: Message
+      'New Lead',                  // F: Status
+      'solarassist.in'             // G: Source
+    ];
     
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        if(targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if(targetElement) {
-            window.scrollTo({
-                top: targetElement.offsetTop - 80,
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-// Add loading state to buttons
-document.querySelectorAll('.btn').forEach(button => {
-    button.addEventListener('click', function(e) {
-        if(this.getAttribute('href') && this.getAttribute('href').startsWith('tel:')) {
-            // Track phone calls
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'phone_click', {
-                    'event_category': 'engagement',
-                    'event_label': this.getAttribute('href')
-                });
-            }
-        }
-        
-        if(this.getAttribute('href') && this.getAttribute('href').includes('wa.me')) {
-            // Track WhatsApp clicks
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'whatsapp_click', {
-                    'event_category': 'engagement',
-                    'event_label': 'WhatsApp Contact'
-                });
-            }
-        }
-    });
-});
-
-// Lazy loading for images
-document.addEventListener('DOMContentLoaded', function() {
-    const lazyImages = [].slice.call(document.querySelectorAll('img[loading="lazy"]'));
+    // Add the row to the sheet
+    sheet.appendRow(row);
     
-    if('IntersectionObserver' in window) {
-        const lazyImageObserver = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(function(entry) {
-                if(entry.isIntersecting) {
-                    const lazyImage = entry.target;
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.remove('lazy');
-                    lazyImageObserver.unobserve(lazyImage);
-                }
-            });
-        });
-        
-        lazyImages.forEach(function(lazyImage) {
-            lazyImageObserver.observe(lazyImage);
-        });
+    // Optional: Send email notification
+    try {
+      MailApp.sendEmail({
+        to: 'solarassist25@gmail.com',
+        subject: '🌞 New SolarAssist Lead - ' + (data.name || 'Unknown'),
+        htmlBody: `
+          <h2>New Lead from SolarAssist Website</h2>
+          <p><strong>Name:</strong> ${data.name || 'Not provided'}</p>
+          <p><strong>Phone:</strong> ${data.phone || 'Not provided'}</p>
+          <p><strong>Email:</strong> ${data.email || 'Not provided'}</p>
+          <p><strong>Message:</strong> ${data.message || 'Not provided'}</p>
+          <p><strong>Time:</strong> ${timestamp.toString()}</p>
+          <br>
+          <p><em>This lead was automatically saved to Google Sheets.</em></p>
+        `
+      });
+    } catch (emailError) {
+      console.error('Email failed:', emailError);
+      // Continue even if email fails
     }
-});
+    
+    // Return success response
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: true,
+        message: 'Form submitted successfully!'
+      }))
+      .setMimetype(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    console.error('Error in doPost:', error);
+    // Return error response
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        error: 'Failed to save data. Please try again.'
+      }))
+      .setMimetype(ContentService.MimeType.JSON);
+  }
+}
+
+// Test function
+function testSubmit() {
+  const testData = {
+    name: "Test Customer",
+    phone: "9876543210",
+    email: "test@email.com",
+    message: "Interested in solar maintenance services"
+  };
+  
+  const result = doPost({
+    postData: {
+      contents: JSON.stringify(testData)
+    }
+  });
+  
+  Logger.log(result.getContent());
+}
